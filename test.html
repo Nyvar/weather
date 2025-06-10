@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <p>Enter city</p>
+    <input type="text" id="cityinput">
+    <div class="showinfo">
+
+    </div>
+
+    <script>
+        const apikey = '4705933231234071926120058251006';
+        let city = document.getElementById("cityinput");
+
+        city.addEventListener("keydown", async function (event) {
+            if (event.key === "Enter") {
+                await getme();
+            }
+        });
+        async function getme() {
+            try {
+                //console.log("API approved");
+                const cityName = city.value.trim();
+                const apiurl = `https://api.weatherapi.com/v1/forecast.json?key=${apikey}&q=${cityName}&days=1&aqi=yes
+`;
+                const response = await fetch(apiurl);
+                //console.log("API approved2");
+                if (!response.ok) {
+                    throw new Error("Failed to fetch weather data");
+                }
+                const data = await response.json();
+                //console.log("API approved3");
+
+                let weather= document.createElement("div");
+                weather.innerHTML+=`
+                    <p>Tempurature :${data.current.temp_c}</p>
+                    <p>Cloud :${data.forecast.forecastday[0].hour[19]}</p>
+                `;
+                document.querySelector('.showinfo').appendChild(weather);
+
+
+                console.log(data);
+            } catch (err) {
+                console.error("Error:", err.message);
+            }
+
+        }
+    </script>
+</body>
+
+</html>

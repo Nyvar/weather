@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather</title>
+    <style>
+        .hourlyTemp {
+            border: 1px solid black;
+            border-radius: 5px;
+            width: 90%;
+
+        }
+
+        .hourlyTemp th,
+        td {
+            padding: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="display: flex; justify-content:space-between;  border-bottom: 1px solid black; padding:10px;">
+        <header>
+            <p >Today Weather</p>
+        </header>
+        <header>
+            <input type="text" placeholder="Phnom Penh 🔍" id="searchcity" value="Phnom Penh">
+        </header>
+    </div>
+
+    <div class="container" style="margin-top: 20px; margin:20px; display:flex; justify-content:space-between">
+
+        <div class="linkto"
+            style="border: none; background-color:aquamarine; width:20vw;padding:20px; width:auto; height:20vh; display:inline-block;  ">
+            <a href="">Live</a><br>
+            <a href="">Tempereture</a><br>
+            <a href="">satalite</a><br>
+            <a href="">Rader</a><br>
+            <a href="">Wind</a><br>
+            <a href="">Preasure</a>
+        </div>
+
+        <center>
+            <div class="display"
+                style="background-color: lightblue; width:50vw; height:auto; border:1px solid black; padding:10px;">
+
+                <div style="display: flex; justify-content:space-between">
+                    <span id="place"></span>
+                    <span id="date">date time</span>
+                </div>
+
+                <div class="tempC"
+                    style="justify-content: space-between; display:flex; align-items:center; padding-left:50px; padding-right:50px;">
+                </div>
+                <hr>
+                <div class="hourlyTemp">
+
+                </div>
+
+
+            </div>
+        </center>
+        <div
+            style="border : 1px dashed black; width:auto;height:70px; display:inline-block; padding:10px; margin-right:10px;">
+            <label>setting<img src=""></label><br>
+            <label>About <img src=""></label><br>
+            <label>Share<img src=""></label>
+        </div>
+    </div>
+
+
+
+    <script>
+        window.onload = () => {
+            getme(); 
+        };
+
+        const apikey = '4705933231234071926120058251006';
+        let city = document.getElementById("searchcity");
+
+        city.addEventListener("input", async function (event) {
+            await getme();
+
+        });
+        async function getme() {
+            try {
+                const cityName = city.value.trim();
+                const apiurl = `https://api.weatherapi.com/v1/forecast.json?key=${apikey}&q=${cityName}&days=1&aqi=yes`;
+                const response = await fetch(apiurl);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch weather data");
+                }
+                const data = await response.json();
+                filldata(data);
+                console.log(data);
+                return data;
+            } catch (err) {
+                console.error("Error:", err.message);
+            }
+        }
+
+
+        function filldata(data) {
+            let Place= document.getElementById("place");
+            Place.textContent="";
+            Place.innerHTML+=`${data.location.country} / ${data.location.name}`;
+
+            const formatted = new Intl.DateTimeFormat('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour12: false
+            }).format(new Date());
+
+            document.getElementById("date").textContent = formatted;
+
+            let emoji = getEmoji(data.current.condition.text);
+            console.log("getemoji");
+            document.querySelector(".tempC").textContent = "";
+            document.querySelector(".tempC").innerHTML += `
+                <span>${emoji}
+                    <p>${data.current.condition.text}</p>
+                </span>
+                <span">${data.current.temp_c}<sup>°</sup></span>
+                <span>
+                    <p>Sunrise: ${data.forecast.forecastday[0].astro.sunrise} </p >
+                    <p>Sunset: ${data.forecast.forecastday[0].astro.sunset}</p>
+                    <p>Duration:</p>
+                    </span >
+                `;
+
+            const hourly = data.forecast.forecastday[0].hour;
+            let showtable = document.querySelector(".hourlyTemp");
+
+            const hours = [19, 20, 21, 22, 23, 0];
+
+            let rowTime = '<tr><th>Today</th>';
+            let rowemoji = '<tr><th>Condition</th>';
+            let rowforecast = '<tr><th>Temp</th>';
+            let rowtemp = '<tr><th>RealFeel</th>';
+            let rowwind = '<tr><th>Wind (km/h)</th>';
+            hours.forEach(hr => {
+                const hourData = hr === 0 ? hourly[0] : hourly[hr];
+                const condition = hourData.condition.text;
+                const emoji = getEmoji(condition);
+                const temp = hourData.temp_c;
+                const realFeel = hourData.feelslike_c;
+                const wind = hourData.wind_kph;
+
+                rowTime += `<th>${hr % 12 === 0 ? 12 : hr % 12}${hr < 12 ? 'am' : 'pm'}</th>`;
+                rowemoji += `<td>${emoji}</td>`;
+                rowforecast += `<td>${temp}°</td>`;
+                rowtemp += `<td>${realFeel}°</td>`;
+                rowwind += `<td>${wind}</td>`;
+            });
+
+            rowTime += '</tr>';
+            rowemoji += '</tr>';
+            rowforecast += '</tr>';
+            rowtemp += '</tr>';
+            rowwind += '</tr>';
+
+            showtable.textContent = "";
+            showtable.innerHTML += `
+            <table>
+                ${rowTime}
+                ${rowemoji}
+                ${rowforecast}
+                ${rowtemp}
+                ${rowwind}
+            </table>
+            `;
+
+        }
+        function getEmoji(condition) {
+            const lower = condition.toLowerCase();
+            if (lower.includes("sunny")) return "🌞";
+            if (lower.includes("cloud")) return "☁️";
+            if (lower.includes("rain")) return "🌧️";
+            if (lower.includes("snow")) return "❄️";
+            return "🌡️";
+        }
+
+
+    </script>
+
+
+
+
+</body>
+
+</html>
