@@ -1,0 +1,42 @@
+ .hourlyTemp {
+     border: 1px solid black;
+     border-radius: 5px;
+     width: 90%;
+ }
+
+ .hourlyTemp th,
+ td {
+     padding: 10px;
+     justify-content: center;
+     align-items: center;
+ }
+
+ .container {
+     margin-top: 20px;
+     margin: 20px;
+     display: flex;
+     justify-content: space-between;
+ }
+
+ .tempC {
+     display: flex;
+     gap: 20px;
+     justify-content: space-between;
+     padding: 25px;
+     margin-top:10px;
+     margin-bottom: 10px;
+     text-align: center;
+     padding-bottom: 0;
+ }
+ 
+ .tempC span p{
+    margin-top: 0;
+ }
+ #emoji ,#viewC{
+     font-size: 70px;
+     margin-bottom: 10px;
+
+ }
+ .hourlyTemp tr th {
+     text-align: left;
+ }
